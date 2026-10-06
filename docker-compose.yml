@@ -24,7 +24,8 @@ services:
     env_file:
       - ".env"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/admin || exit 1"]
@@ -35,9 +36,13 @@ services:
     networks:
       - notes-app-nw
 
-  db:
-    image: mysql
+    db:
+    image: mysql:8.0
     container_name: "db_cont"
+    command: >
+      --innodb-buffer-pool-size=128M
+      --max-connections=30
+      --performance-schema=OFF
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=test_db
@@ -47,8 +52,9 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
       start_period: 60s
+    restart: always
     networks:
       - notes-app-nw
 
