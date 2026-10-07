@@ -27,7 +27,7 @@ pipeline {
         
         stage('deploy') {
             steps {
-                docker_compose()
+                sh 'docker compose up -d'
             }
         }
     }
